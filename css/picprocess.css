@@ -1,0 +1,197 @@
+body{
+	height: 100%;
+	overflow: hidden;
+}
+.fixed-bar{
+	position: fixed;
+	top: 40px;
+	left: 20px;
+	padding: 5px 0;
+	width: 190px;
+	background: #F8F9F9;
+	border: 1px solid #e6e6e6;
+	border-radius: 8px;
+}
+.fixed-bar li{
+	position: relative;
+}
+.fixed-bar li .title{
+	padding: 0 10px;
+	height: 40px;
+	line-height: 40px;	
+	font-size: 14px;
+	color: #666;
+	cursor: pointer;
+}
+.fixed-bar li .title p{
+	padding-left: 40px;
+	border-bottom: 1px solid #e6e6e6;
+}
+.fixed-bar li:last-child .title p{
+	border: 0;
+}
+.fixed-bar li .container{
+	box-sizing: content-box;
+	height: 0;
+	overflow: hidden;
+	transition: all .5s ease;
+	background: #fff;
+}
+.imgBorder{
+	max-height: 500px;
+	overflow-y: auto !important;
+	overflow-x: auto !important;
+}
+.fixed-bar li .container .content{
+	padding: 15px 10px 5px;
+	border-top: 1px solid #dfdfdf;
+	border-bottom: 1px solid #dfdfdf;
+	font-size: 0;
+}
+.fixed-bar li .container .content .base{
+	font-size: 12px;
+	color: #666;
+}
+.fixed-bar li .container .content .base span{
+	float: right;
+	color: #999;
+}
+.fixed-bar li .container .content .base input[type=range]{
+	margin-top: 10px;
+	width: 100%;
+}
+.fixed-bar li .container li{
+	display: inline-block;
+	margin-right: 5px;
+	margin-bottom: 10px;
+	padding: 10px;
+	border: 1px solid #e6e6e6;
+	border-radius: 8px;
+	font-size: 12px;
+	color: #666;
+	cursor: pointer;
+}
+.fixed-bar li .container .active2{
+	border: 2px solid #5cb85c;
+}
+.fixed-bar li .container li img{
+	width: 100%;
+}
+.fixed-bar li .container .active{
+	background: #5cb85c;
+	color: #fff;
+}
+.pic_processt{
+	height: 80px;
+	line-height: 80px;
+	font-size: 32px;
+	color: #333;
+	text-align: center;
+}
+.picposition{
+	position: relative;
+	margin:0 auto;
+	width:800px;
+	height: 400px;
+}
+.picposition canvas{
+	border: 1px solid #e6e6e6;
+}
+.file-bt{
+	position: absolute;
+	top: 180px;
+	left: 50%;
+	margin-left: -100px;
+	height: 46px;
+	width:200px;
+	background: #337ab7;
+	border-radius: 5px;
+	cursor:pointer;
+}
+.file-bt p{
+	position: absolute;
+	z-index: 0;
+	top: 0;
+	left: 0;
+	width: 200px;
+	height: 46px;
+	font-size: 24px;
+	text-align: center;
+	line-height: 46px;
+	color:#fff;
+	cursor:pointer;
+}
+#butpic{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 200px;
+	height: 46px;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.menu{
+	height: 40px;
+}
+.menu li{
+	float: left;
+	width: 100px;
+	height: 40px;
+	line-height: 40px;
+	text-align: center;
+	font-size: 20px;
+	color: #333;
+	cursor: pointer;
+	border: 1px solid #337ab7;
+}
+.menuList{
+	display: none;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 110px;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+.menuList-active{
+	display: block;
+}
+.menuList li{
+	float: left;
+	padding: 0 20px;
+	height: 110px;
+	line-height: 110px;
+
+}
+.top{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 150px;
+}
+.bottom{
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 150px;
+}
+.download{
+	position: absolute;
+	top: 40px;
+	right: 40px;
+}
+.download input[type=button]{
+	-webkit-appearance: none;
+	height: 36px;
+	width:120px;
+	background: #337ab7;
+	border-radius: 5px;
+	font-size: 16px;
+	color:#fff;
+	border: 0;
+	cursor: pointer;
+}
