@@ -11,20 +11,509 @@
 		<meta name="App-Config" content="fullscreen=yes,useHistoryState=yes,transition=yes">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<link rel="stylesheet" type="text/css" href="css/resize.css">
-		<link rel="stylesheet" type="text/css" href="css/index.css">
+		<link rel="stylesheet" type="text/css" href="css/picprocess.css">
 	</head>
-
 	<body>
-		<div class="logo">
-			<img id="logo" src="images/index/logo.png">
-			<img id="slg" src="images/index/slg.png">
-			<img id="title" src="images/index/title.png">
-		</div>
 		<div>
-			<img id="pic_process" src="images/index/t1.png">
-			<img id="emoticon" src="images/index/t2.png">
-			<img id="puzzle" src="images/index/t3.png">
+			<h1 class="pic_processt">图片处理</h1>
+			<div class="picposition">
+				<canvas id="canvas" width="800" height="400"></canvas>
+			</div>
+			<div class="file-bt">
+				<p>上传图片</p>
+				<input type="file" name="" id="butpic">
+			</div>
 		</div>
-		<script type="text/javascript" src="js/index.js"></script>
+		<div class="download">
+			<input id="download" type="button" value="保存并下载">
+		</div>
+		<div class="fixed-bar" id="tool">
+			<ul>
+				<li>
+					<div class="title"><p class="tool-title">基础调整</p></div>
+					<div class="container hidden">
+						<div class="content">
+							<div class="base">
+								<p>亮度<span class="baseValue">50</span></p>
+								<input id="brightness" type="range" value="50">
+							</div>
+							<div class="base">
+								<p>对比度<span class="baseValue">50</span></p>
+								<input id="contrast" type="range" value="50">
+							</div>
+							<!--<div class="base">
+								<p>饱和度<span class="baseValue">50</span></p>
+								<input id="saturation" type="range" value="50">
+							</div>-->
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="title"><p class="tool-title">添加滤镜</p></div>
+					<div class="container hidden">
+						<ul class="content" id="filter">
+							<li data-name="spread">油画</li>
+							<li data-name="gray">灰度</li>
+							<li data-name="comic">连环画</li>
+							<li data-name="old">怀旧</li>
+							<li data-name="negatives">底片</li>
+							<li data-name="black">黑白</li>
+							<li data-name="cameo">浮雕</li>
+							<li data-name="casting">熔铸</li>
+							<li data-name="frozen">冰冻</li>							
+						</ul>
+					</div>
+				</li>
+				<!--边框栏-->
+				<li>
+					<div class="title"><p class="tool-title">添加边框</p></div>
+					<div class="container hidden imgBorder">
+						<ul class="content" id="imgBorder">
+							<li><img src="images/pic_process/border/1.png"</li>
+							<li><img src="images/pic_process/border/2.png"</li>	
+							<li><img src="images/pic_process/border/3.png"</li>	
+							<li><img src="images/pic_process/border/4.png"</li>	
+							<li><img src="images/pic_process/border/5.png"</li>					
+						</ul>
+					</div>
+				</li>
+				<!--饰品栏-->
+				<li>
+					<div class="title"><p class="tool-title">添加饰品</p></div>
+					<div class="container hidden">
+						<ul class="content" id="imgFlowers">
+							<li><img src="images/pic_process/flowers/glass1.png"</li>			
+						</ul>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<script type="text/javascript" src="js/filter.js"></script>
+		<script>
+			/*侧边工具栏伸展*/
+			var tool = document.getElementById('tool');
+			tool.addEventListener('click', function(evt){
+				var target = evt.target;
+				if(target.classList.contains('tool-title')){
+					var container = target.parentNode.parentNode.getElementsByClassName('container')[0];
+					var curHeight = getStyle(container.getElementsByClassName('content')[0],'height');
+					var status = container.getAttribute('data-status') || 0;
+					if(status == 0){
+						container.style.height = curHeight + 'px';
+						container.setAttribute('data-status', 1);
+					}
+					else{
+						container.style.height = '0px';
+						container.setAttribute('data-status', 0);
+					}
+					
+					
+				}
+			});
+			/*图片处理和下载*/
+			var brightness = document.getElementById('brightness');//亮度
+			var contrast = document.getElementById('contrast');//对比度
+			/*var saturation = document.getElementById('saturation');*///饱和度
+			var butpicCon = document.getElementsByClassName('file-bt')[0];//上传图片按钮容器
+			var butpic = document.getElementById('butpic');//上传图片按钮
+			var canvas = document.getElementById('canvas');//画布
+			var context = canvas.getContext("2d");
+			var filterCon = document.getElementById('filter');//滤镜容器
+			var filterLiCon = filterCon.getElementsByTagName('li');//滤镜列表
+			var borderCon = document.getElementById('imgBorder');//边框
+			var borderLiCon = borderCon.getElementsByTagName('li');//边框列表
+			var flowerCon = document.getElementById('imgFlowers');//饰品
+			var flowerLiCon = borderCon.getElementsByTagName('li');//饰品列表
+			var download = document.getElementById('download');//下载按钮
+			var uploadImg = new Image();//图片对象
+			var formdata = new FormData();//发送给后台的图片对象
+			/*亮度*/
+			brightness.addEventListener('change', function(){
+				if(uploadImg.src == ''){
+					this.value = 50;
+					alert('请先上传图片');
+					return;
+				}
+				var value = this.value;
+				var span = this.parentNode.getElementsByClassName('baseValue')[0];
+				span.innerText = value;
+				filterInit('brightness',value - 50);
+			});
+			/*对比度*/
+			contrast.addEventListener('change', function(){
+				if(uploadImg.src == ''){
+					this.value = 50;
+					alert('请先上传图片');
+					return;
+				}
+				var value = this.value;
+				var span = this.parentNode.getElementsByClassName('baseValue')[0];
+				span.innerText = value;
+				filterInit('contrast',value - 50)
+			});
+			/*饱和度*/
+			/*saturation.addEventListener('change', function(){
+				if(uploadImg.src == ''){
+					this.value = 50;
+					alert('请先上传图片');
+					return;
+				}
+				var value = this.value;
+				var span = this.parentNode.getElementsByClassName('baseValue')[0];
+				span.innerText = value;
+			});*/
+			/*上传图片按钮*/
+			butpic.addEventListener('change', function(){
+				var reader = new FileReader();
+				reader.readAsDataURL(butpic.files[0]);
+				formdata.append('img',butpic.files[0]);
+				/*var request = new XMLHttpRequest();
+				request.open("POST", "upload.php");
+				request.send(formData);
+				request.onreadystatechange = function(){
+					if(xhr.readyState == 4){
+						if((xhr.status >= 200 && xhr.status < 300 || xhr.status == 304)){
+							var responseText = JSON.parse(xhr.responseText);
+							var code = responseText.code;
+							if(code == 1){
+
+							}
+							else{
+								alert('上传失败');
+							}
+						}
+						else{
+							console.log('访问失败了,错误代码:' + xhr.status);
+						}
+					}
+				}*/
+				reader.onload = function () {
+					uploadImg.src = reader.result;
+					uploadImg.onload = function(){
+						if(uploadImgInit(uploadImg)){
+							canvas.width = 800;
+							canvas.height = 400;
+							var centerW = (800-uploadImg.width)/2;
+							var centerH = (400-uploadImg.height)/2;
+							context.drawImage(uploadImg, centerW, centerH,uploadImg.width,uploadImg.height);
+							butpicCon.style.display = 'none';
+						}
+					};
+				}
+			});
+			/*滤镜选择*/
+			filterCon.addEventListener('click', function(evt){
+				if(uploadImg.src == ''){
+					alert('请先上传图片');
+					return;
+				}
+				var target = evt.target;
+				if(target.nodeName.toUpperCase() == 'LI'){
+					var name = target.getAttribute('data-name');
+					for(var i=0,len=filterLiCon.length;i<len;i++){
+						filterLiCon[i].classList.remove('active');
+					}
+					target.classList.add('active');
+					filterInit(name);
+				}
+			})
+			/*滤镜控制中心,包括基础设置*/
+			function filterInit(name,value){				
+				canvas.width = 800;
+				canvas.height = 400;
+				var centerW = (800-uploadImg.width)/2;
+				var centerH = (400-uploadImg.height)/2;
+				context.drawImage(uploadImg, centerW, centerH,uploadImg.width,uploadImg.height);
+				var canvasData = context.getImageData(centerW, centerH, uploadImg.width, uploadImg.height);
+				if(name == "gray"){
+   					canvasData=gray(canvasData);
+				}
+				else if(name == "spread"){
+   					canvasData=spread(canvasData);
+				}
+				else if(name == "comic"){
+   					canvasData=comic(canvasData);
+				}
+				else if(name == "old"){
+   					canvasData=old(canvasData);
+				}
+				else if(name == "negatives"){
+   					canvasData=negatives(canvasData);
+				}
+				else if(name == "black"){
+   					canvasData=black(canvasData);
+				}
+				else if(name == "cameo"){
+   					canvasData=cameo(canvasData);
+				}
+				else if(name == "casting"){
+   					canvasData=casting(canvasData);
+				}
+				else if(name == "frozen"){
+   					canvasData=frozen(canvasData);
+				}
+				else if(name == "brightness"){
+					canvasData=brightnessFilter(canvasData,value);
+				}
+				else if(name == "contrast"){
+					canvasData=contrastFilter(canvasData,value);
+				}
+				context.putImageData(canvasData, centerW, centerH);
+			}
+			/*边框选择*/
+			var borderImage = new Image();
+			borderCon.addEventListener('click', function(evt){
+				if(uploadImg.src == ''){
+					alert('请先上传图片');
+					return;
+				}
+				var target = evt.target;
+				if(target.nodeName.toUpperCase() == 'LI' || target.nodeName.toUpperCase() == 'IMG'){
+					for(var i=0,len=borderLiCon.length;i<len;i++){
+						borderLiCon[i].classList.remove('active2');
+					}
+					if(target.nodeName.toUpperCase() == 'LI'){
+						target.classList.add('active2');
+						borderImage.src = target.getElementsByTagName('img')[0].getAttribute('src');
+					}
+					else if(target.nodeName.toUpperCase() == 'IMG'){
+						target.parentNode.classList.add('active2');
+						borderImage.src = target.getAttribute('src');;
+					}
+					borderImage.onload = function(){
+						addBorder();
+					}
+					
+				}
+			});
+			function addBorder(){
+				canvas.width = 800;
+				canvas.height = 400;
+				var centerW = (800-uploadImg.width)/2;
+				var centerH = (400-uploadImg.height)/2;
+				context.drawImage(uploadImg, centerW, centerH,uploadImg.width,uploadImg.height);
+				if(uploadImgInit(borderImage)){
+					var borderImgW = borderImage.width;
+					var borderImgH = borderImage.height;
+					context.drawImage(borderImage, (800-borderImgW)/2, (400-borderImgH)/2, borderImgW, borderImgH);
+				}
+			}
+			/*饰品*/
+			var flowerImage = new Image();
+			var flowerX = 0;
+			var flowerY = 0;
+			flowerCon.addEventListener('click', function(evt){
+				if(uploadImg.src == ''){
+					alert('请先上传图片');
+					return;
+				}
+				var target = evt.target;
+				if(target.nodeName.toUpperCase() == 'LI' || target.nodeName.toUpperCase() == 'IMG'){
+					for(var i=0,len=flowerLiCon.length;i<len;i++){
+						flowerLiCon[i].classList.remove('active2');
+					}
+					if(target.nodeName.toUpperCase() == 'LI'){
+						target.classList.add('active2');
+						flowerImage.src = target.getElementsByTagName('img')[0].getAttribute('src');
+					}
+					else if(target.nodeName.toUpperCase() == 'IMG'){
+						target.parentNode.classList.add('active2');
+						flowerImage.src = target.getAttribute('src');;
+					}
+					var request = new XMLHttpRequest();
+					request.open("POST", "gain.php");
+					request.onreadystatechange = function(){
+						if(xhr.readyState == 4){
+							if((xhr.status >= 200 && xhr.status < 300 || xhr.status == 304)){
+								var responseText = JSON.parse(xhr.responseText);
+								var code = responseText.code;
+								if(code == 1){
+									flowerX = responseText.desc[0];
+									flowerY = responseText.desc[1];
+								}
+								else{
+									alert('返回失败了');
+								}
+							}
+							else{
+								console.log('访问失败了,错误代码:' + xhr.status);
+							}
+						}
+					}
+					flowerImage.onload = function(){
+						addFlower();
+					}
+					
+				}
+			});
+			function addFlower(){
+				canvas.width = 800;
+				canvas.height = 400;
+				var centerW = (800-uploadImg.width)/2;
+				var centerH = (400-uploadImg.height)/2;
+				context.drawImage(uploadImg, centerW, centerH,uploadImg.width,uploadImg.height);
+				if(uploadImgInit(flowerImage)){
+					var flowerImgW = flowerImage.width;
+					var flowerImgH = flowerImage.height;
+					context.drawImage(flowerImage, flowerX+centerW, flowerY+centerH, flowerImgW, flowerImgH);
+				}	
+			}
+			/*上传的图片始终在canvas内部*/
+			function uploadImgInit(img){
+				var ratio = 800 / 400;
+				var imgRatio = img.naturalWidth / img.naturalHeight;
+				var imgW = img.naturalWidth;
+				var imgH = img.naturalHeight;
+				if(imgW > 800){
+					img.width = 800;
+					img.height = img.width / imgRatio;
+					if(img.height > 400){
+						img.height = 400;
+						img.width = 400 * imgRatio;
+						return true;
+					}
+					else{
+						return true;
+					}
+				}
+				else if(imgH > 400){
+					img.height = 400;
+					img.width = img.height * imgRatio;
+					if(img.width > 800){
+						img.width = 800;
+						img.height = 800 / imgRatio;
+						return true;
+					}
+					else{
+						return true;
+					}
+				}
+				else{
+					return true;
+				}
+			}
+			/**
+			 * 在本地进行文件保存
+			 * @param  {String} data     要保存到本地的图片数据
+			 * @param  {String} filename 文件名
+			 */
+			var saveFile = function(data, filename){
+				var save_link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+				save_link.href = data;
+				save_link.download = filename;
+				
+				var event = document.createEvent('MouseEvents');
+				event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+				save_link.dispatchEvent(event);
+			};
+				
+			/*下载*/
+			download.addEventListener('click', function(){
+				//图片导出为 png 格式
+				var type = 'png';
+				var imgData = canvas.toDataURL(type);
+				// 加工image data，替换mime type
+				imgData = imgData.replace(_fixType(type),'image/octet-stream');  
+				// 下载后的问题名
+				var filename = 'bloglaotou_' + (new Date()).getTime() + '.' + type;
+				// download
+				saveFile(imgData,filename);
+			});
+			var _fixType = function(type) {
+				type = type.toLowerCase().replace(/jpg/i, 'jpeg');
+				var r = type.match(/png|jpeg|bmp|gif/)[0];
+				return 'image/' + r;
+			};
+			function getStyle(el,attribute){
+				var styles;
+				if(el.currentStyle){
+					styles = el.currentStyle;
+				}
+				else{
+					styles = window.getComputedStyle(el,null);
+				}
+				const value = styles.getPropertyValue(attribute) || styles.attribute;
+				return parseInt(value);
+			}
+			function ajax(options){
+				var method = options.method || 'get';
+				var url = options.url || '';
+				var dataType = options.dataType || 'json';
+				var data = options.data || '';
+				if(method == 'post'){
+					data = postParams(data) || '';
+				}
+				else{
+					if(data != ''){
+						url = getParams(data, url) || '';
+					}
+				}
+				var success = options.success || '';
+				var xhr = createXHR();
+				xhr.onreadystatechange = function(){
+					if(xhr.readyState == 4){
+						if((xhr.status >= 200 && xhr.status < 300 || xhr.status == 304)){
+							var responseText = JSON.parse(xhr.responseText);
+							success(responseText);
+						}
+						else{
+							console.log('访问失败了,错误代码:' + xhr.status);
+						}
+					}
+				}
+				xhr.open(method, url, true);
+				if(method == 'post'){
+					xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+					xhr.send(data);
+					
+				}
+				else{
+					xhr.send(null);
+				}
+				
+				function createXHR(){
+					if(typeof XMLHttpRequest != "undefined"){
+						return new XMLHttpRequest();
+					}
+					else if(typeof ActiveXObject != "undefined"){
+						if(typeof arguments.callee.activeXString != "string"){
+							var versions = ["MSXML2.XMLHttp.6.0", "MSXML2.XMLHttp.3.0", "MSXML2.XMLHttp"], i, len;
+							for(i=0, len=versions.length;i<len;i++){
+								try{
+									new ActiveXObject(versions[i]);
+									arguments.callee.activeXString = versions[i];
+									break;
+								}catch(ex){
+
+								}
+							}
+							return new ActiveXObject(arguments.callee.activeXString);
+						}
+						else{
+							throw new Error("NO XHR object available.");
+						}
+					}
+				}
+				function postParams(data){
+					var arr = [];
+					for (var i in data) {
+						//特殊字符传参产生的问题可以使用encodeURIComponent()进行编码处理
+						arr.push(encodeURIComponent(i) + '=' + encodeURIComponent(data[i]));
+					}
+					return arr.join('&');
+				}
+				function getParams(data,url){
+					var arr = [];
+					for (var i in data) {
+						//特殊字符传参产生的问题可以使用encodeURIComponent()进行编码处理
+						arr.push(encodeURIComponent(i) + '/' + encodeURIComponent(data[i]));
+					}
+					arr = arr.join('/');
+					url += (url.indexOf("?") == -1 ? "/" : "/");
+					url += arr;
+					return url;
+				}
+			}
+		</script>
 	</body>
 </html>
